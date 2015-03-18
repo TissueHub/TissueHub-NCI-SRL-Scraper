@@ -20,10 +20,6 @@ getIndex = (callback) ->
         "csrfmiddlewaretoken": "70q2kVe4AijDWsDgsqNCxKkL2sWVeoRb"
         "page": 0
 
-    # request {url: rootUrl, method: "POST", headers: headers, form: form}, (err, resp, body) ->
-    #     $ = cheerio.load(body)
-    #     index = $("table.listing tbody tr td a").map (i, el) -> console.log $(el).attr "href"
-
     request {url: searchUrl, method: "POST", headers: headers, form: form}, (err, resp, body) ->
         $ = cheerio.load(body)
         index = $("table.listing tbody tr td a").map (i, el) ->
@@ -35,12 +31,32 @@ getIndex = (callback) ->
 
 annotateCollections = (callback) ->
     getIndex (err, index) ->
+
         annotateCollection = (collection, done) ->
-            collection.visited = true
-            done()
+            request.get collection.sourceUrl, (err, resp, body) ->
+                # collection.body = body
+                $ = cheerio.load(body)
+
+                collection.phenotypes = []
+                collection.specimenTypes = []
+                $("dt").map (i, el) ->
+                    switch $(el).text()
+                        when "Organ Site" then appendValues collection.phenotypes, $(el)
+                        when "Histology / Tumor Type" then appendValues collection.phenotypes, $(el)
+                        when "Specimen Type" then appendValues collection.specimenTypes, $(el)
+                        when "Other Specimen Types in this Collection (if any)" then appendValues collection.specimenTypes, $(el)
+                        when "Preservation Type" then appendValues collection.specimenTypes, $(el)
+                collection.contactEmail = $(".contact.wrap a").filter((i, el) -> $(el).attr("href").match("mailto")).text()
+                done()
+
         queue = async.queue annotateCollection, 4
         queue.drain = -> callback null, index
-        queue.push index
+        queue.push index.slice 0,5
+
+appendValues = (array, $el) ->
+    values = $el.next().text().split(",")
+    values.forEach (value) ->
+        if value then array.push value.trim()
 
 annotateCollections (err, index) ->
-    console.log index[0]
+    console.log index.slice 0,5
