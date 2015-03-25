@@ -1,12 +1,12 @@
 {
-  "name": "th-srl-mapper",
+  "name": "TissueHub NCI-SRL Scraper",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "A scraper for importing collections from the NCI Specimen Resource Locator into TissueHub",
+  "main": "index.coffee",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "David Robbins",
   "license": "ISC",
   "dependencies": {
     "async": "^0.9.0",

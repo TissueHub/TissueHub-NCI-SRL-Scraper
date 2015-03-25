@@ -47,11 +47,12 @@ annotateCollections = (callback) ->
                         when "Other Specimen Types in this Collection (if any)" then appendValues collection.specimenTypes, $(el)
                         when "Preservation Type" then appendValues collection.specimenTypes, $(el)
                 collection.contactEmail = $(".contact.wrap a").filter((i, el) -> $(el).attr("href").match("mailto")).text()
+                collection.hostInstitution = $("h1").text()
                 done()
 
         queue = async.queue annotateCollection, 4
         queue.drain = -> callback null, index
-        queue.push index.slice 0,5
+        queue.push index
 
 appendValues = (array, $el) ->
     values = $el.next().text().split(",")
